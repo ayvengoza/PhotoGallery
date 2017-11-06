@@ -3,6 +3,9 @@ package com.ayvengoza.photogallery;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +16,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -78,16 +82,10 @@ public class FlickrFetchr {
         JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
         JSONArray photoJsonArray = photosJsonObject.getJSONArray("photo");
 
-        for(int i=0; i<photoJsonArray.length(); i++){
-            JSONObject photoJsonObject = photoJsonArray.getJSONObject(i);
-            GalleryItem item = new GalleryItem();
-            item.setId(photoJsonObject.getString("id"));
-            item.setCaption(photoJsonObject.getString("title"));
-            if(!photoJsonObject.has("url_s")){
-                continue;
-            }
-            item.setUrl(photoJsonObject.getString("url_s"));
-            items.add(item);
-        }
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        GalleryItem[] itemArr = gson.fromJson(photoJsonArray.toString(), GalleryItem[].class);
+        items.addAll(Arrays.asList(itemArr));
+
     }
 }
