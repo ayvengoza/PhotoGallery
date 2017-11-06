@@ -25,6 +25,8 @@ public class PhotoGalleryFragment extends Fragment {
     private static final String TAG = "PhotoGalleryFragment";
     private RecyclerView mPhotoRecyclerView;
     private List<GalleryItem> mItems = new ArrayList<>();
+    private RecyclerView.Adapter mAdapter;
+    private int page = 1;
 
     public static Fragment newInstance(){
         Bundle args = new Bundle();
@@ -37,7 +39,7 @@ public class PhotoGalleryFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        new FetchItemTask().execute();
+        new FetchItemTask().execute(page);
     }
 
     @Nullable
@@ -46,26 +48,41 @@ public class PhotoGalleryFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
         mPhotoRecyclerView = (RecyclerView) view.findViewById(R.id.photo_resycler_view);
         mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        mPhotoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!recyclerView.canScrollVertically(1)) {
+                    Log.i(TAG, "bottom");
+                    new FetchItemTask().execute(++page);
+                }
+            }
+        });
         setupAdapter();
         return view;
     }
 
     private void setupAdapter(){
         if(isAdded()){
-            mPhotoRecyclerView.setAdapter(new PhotoAdapter(mItems));
+            if(mAdapter == null){
+                mAdapter = new PhotoAdapter(mItems);
+                mPhotoRecyclerView.setAdapter(mAdapter);
+            } else {
+                mAdapter.notifyDataSetChanged();
+            }
         }
     }
 
-    private class FetchItemTask extends AsyncTask<Void, Void, List<GalleryItem>> {
+    private class FetchItemTask extends AsyncTask<Integer, Void, List<GalleryItem>> {
         @Override
-        protected List<GalleryItem> doInBackground(Void... voids) {
-            List<GalleryItem> galleryItems = new FlickrFetchr().fetchItems();
+        protected List<GalleryItem> doInBackground(Integer... params) {
+            List<GalleryItem> galleryItems = new FlickrFetchr().fetchItems(params[0]);
             return galleryItems;
         }
 
         @Override
         protected void onPostExecute(List<GalleryItem> galleryItems) {
-            mItems = galleryItems;
+            mItems.addAll(galleryItems);
             setupAdapter();
         }
     }
