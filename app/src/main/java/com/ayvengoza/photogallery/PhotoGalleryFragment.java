@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ public class PhotoGalleryFragment extends Fragment {
     private List<GalleryItem> mItems = new ArrayList<>();
     private RecyclerView.Adapter mAdapter;
     private int page = 1;
+    private int mColumn = 0;
 
     public static Fragment newInstance(){
         Bundle args = new Bundle();
@@ -49,8 +51,15 @@ public class PhotoGalleryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
         mPhotoRecyclerView = (RecyclerView) view.findViewById(R.id.photo_resycler_view);
-        Log.i(TAG, "Width recycler " + mPhotoRecyclerView.getWidth());
-        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getColumn()));
+        mPhotoRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                double width = 1080/3;
+                int column = (int)(mPhotoRecyclerView.getWidth()/width);
+                Log.i(TAG, "Column " + column);
+                setColumn(column);
+            }
+        });
         mPhotoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -65,14 +74,11 @@ public class PhotoGalleryFragment extends Fragment {
         return view;
     }
 
-    private int getColumn(){
-        Display display = getActivity().getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        Log.i(TAG, "Display size, width=" + size.x + " height=" + size.y);
-        double param = 1080/3;
-        int column = (int)(size.x/param);
-        return column;
+    private void setColumn(int column){
+        if(mColumn != column){
+            mColumn = column;
+            mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), column));
+        }
     }
 
     private void setupAdapter(){
