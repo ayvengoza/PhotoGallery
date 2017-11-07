@@ -1,5 +1,6 @@
 package com.ayvengoza.photogallery;
 
+import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
@@ -38,7 +40,7 @@ public class PhotoGalleryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        setRetainInstance(false);
         new FetchItemTask().execute(page);
     }
 
@@ -47,7 +49,8 @@ public class PhotoGalleryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
         mPhotoRecyclerView = (RecyclerView) view.findViewById(R.id.photo_resycler_view);
-        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        Log.i(TAG, "Width recycler " + mPhotoRecyclerView.getWidth());
+        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getColumn()));
         mPhotoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -60,6 +63,16 @@ public class PhotoGalleryFragment extends Fragment {
         });
         setupAdapter();
         return view;
+    }
+
+    private int getColumn(){
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        Log.i(TAG, "Display size, width=" + size.x + " height=" + size.y);
+        double param = 1080/3;
+        int column = (int)(size.x/param);
+        return column;
     }
 
     private void setupAdapter(){
