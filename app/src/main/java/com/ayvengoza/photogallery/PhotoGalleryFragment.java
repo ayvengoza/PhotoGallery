@@ -31,6 +31,7 @@ public class PhotoGalleryFragment extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private int page = 1;
     private int mColumn = 0;
+    private int mPosition = 0;
 
     public static Fragment newInstance(){
         Bundle args = new Bundle();
@@ -42,7 +43,7 @@ public class PhotoGalleryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(false);
+        setRetainInstance(true);
         new FetchItemTask().execute(page);
     }
 
@@ -74,21 +75,26 @@ public class PhotoGalleryFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        GridLayoutManager manager = (GridLayoutManager)mPhotoRecyclerView.getLayoutManager();
+        mPosition = manager.findFirstVisibleItemPosition();
+    }
+
     private void setColumn(int column){
         if(mColumn != column){
             mColumn = column;
-            mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), column));
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), column);
+            mPhotoRecyclerView.setLayoutManager(gridLayoutManager);
+            gridLayoutManager.scrollToPosition(mPosition);
         }
     }
 
     private void setupAdapter(){
-        if(isAdded()){
-            if(mAdapter == null){
-                mAdapter = new PhotoAdapter(mItems);
-                mPhotoRecyclerView.setAdapter(mAdapter);
-            } else {
-                mAdapter.notifyDataSetChanged();
-            }
+        if (isAdded()) {
+            mAdapter = new PhotoAdapter(mItems);
+            mPhotoRecyclerView.setAdapter(mAdapter);
         }
     }
 
@@ -102,7 +108,7 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         protected void onPostExecute(List<GalleryItem> galleryItems) {
             mItems.addAll(galleryItems);
-            setupAdapter();
+            mAdapter.notifyDataSetChanged();
         }
     }
 
