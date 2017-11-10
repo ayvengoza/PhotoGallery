@@ -127,8 +127,12 @@ public class PhotoGalleryFragment extends Fragment {
     private class FetchItemTask extends AsyncTask<Integer, Void, List<GalleryItem>> {
         @Override
         protected List<GalleryItem> doInBackground(Integer... params) {
-            List<GalleryItem> galleryItems = new FlickrFetchr().fetchItems(params[0]);
-            return galleryItems;
+            String query = null;
+            if(query == null){
+                return new FlickrFetchr().fetchResentPhotos(params[0]);
+            } else {
+                return new FlickrFetchr().searchPhotos(query, params[0]);
+            }
         }
 
         @Override
