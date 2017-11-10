@@ -1,7 +1,6 @@
 package com.ayvengoza.photogallery;
 
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -12,16 +11,14 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import java.io.IOException;
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,6 +149,14 @@ public class PhotoGalleryFragment extends Fragment {
         public void bindDrawable(Drawable drawable){
             mItemImageView.setImageDrawable(drawable);
         }
+
+        //Work with Picasso
+        public void bindPicassoUrl(String url){
+            Picasso.with(getActivity())
+                    .load(url)
+                    .placeholder(R.drawable.ic_place_holder_small)
+                    .into(mItemImageView);
+        }
     }
 
     private class PhotoAdapter extends RecyclerView.Adapter<PhotoHolder>{
@@ -172,9 +177,14 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         public void onBindViewHolder(PhotoHolder photoHolder, int position) {
             GalleryItem galleryItem = mGalleryItems.get(position);
-            Drawable placeholder = getResources().getDrawable(R.drawable.ic_place_holder_small);
+
+            //Use Picasso framework
+            photoHolder.bindPicassoUrl(galleryItem.getUrl());
+
+            //Use own implementation
+            /*Drawable placeholder = getResources().getDrawable(R.drawable.ic_place_holder_small);
             photoHolder.bindDrawable(placeholder);
-            mThumbnailDownloader.queueThumbnail(photoHolder, galleryItem.getUrl());
+            mThumbnailDownloader.queueThumbnail(photoHolder, galleryItem.getUrl());*/
         }
 
         @Override
