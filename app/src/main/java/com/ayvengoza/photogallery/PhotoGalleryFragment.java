@@ -1,5 +1,6 @@
 package com.ayvengoza.photogallery;
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -191,6 +192,7 @@ public class PhotoGalleryFragment extends Fragment {
 
     private class FetchItemTask extends AsyncTask<String, Void, List<GalleryItem>> {
         private String mQuery;
+        private ProgressDialog mProgressDialog = new ProgressDialog(getActivity());
 
         public FetchItemTask(String query){
             mQuery = query;
@@ -199,6 +201,14 @@ public class PhotoGalleryFragment extends Fragment {
         public FetchItemTask(){
 
         }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressDialog.setMessage(getResources().getString(R.string.porogres_loading));
+            mProgressDialog.show();
+        }
+
         @Override
         protected List<GalleryItem> doInBackground(String... params) {
             if(mQuery == null){
@@ -212,6 +222,7 @@ public class PhotoGalleryFragment extends Fragment {
         protected void onPostExecute(List<GalleryItem> galleryItems) {
             mItems.addAll(galleryItems);
             mAdapter.notifyDataSetChanged();
+            mProgressDialog.dismiss();
         }
     }
 
