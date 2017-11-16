@@ -17,8 +17,19 @@ public class PhotoPageActivity extends SingleFragmentActivity {
         i.setData(photoPageUri);
         return i;
     }
+
+    private Fragment mFragment;
     @Override
     Fragment getFragment() {
-        return PhotoPageFragment.newInstance(getIntent().getData());
+        mFragment = PhotoPageFragment.newInstance(getIntent().getData());
+        return mFragment;
+    }
+
+    @Override
+    public void onBackPressed() {
+        boolean canGoBack = ((PhotoPageFragment)mFragment).canGoBack();
+        if(!canGoBack){
+            super.onBackPressed();
+        }
     }
 }

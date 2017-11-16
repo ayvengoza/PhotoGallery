@@ -1,8 +1,10 @@
 package com.ayvengoza.photogallery;
 
+import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,11 +63,23 @@ public class PhotoPageFragment extends VisibleFragment {
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
                 AppCompatActivity activity = (AppCompatActivity) getActivity();
-                activity.getSupportActionBar().setSubtitle(title);
+                if(activity != null) {
+                    ActionBar actionBar = activity.getSupportActionBar();
+                    activity.getSupportActionBar().setSubtitle(title);
+                }
             }
         });
+
         mWebView.setWebViewClient(new WebViewClient());
         mWebView.loadUrl(mUri.toString());
         return view;
+    }
+
+    public boolean canGoBack(){
+        if(mWebView.canGoBack()) {
+            mWebView.goBack();
+            return true;
+        }
+        return false;
     }
 }
