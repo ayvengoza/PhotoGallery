@@ -240,12 +240,14 @@ public class PhotoGalleryFragment extends VisibleFragment {
         }
     }
 
-    private class PhotoHolder extends RecyclerView.ViewHolder{
+    private class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private ImageView mItemImageView;
+        private GalleryItem mGalleryItem;
 
         public PhotoHolder(View itemView) {
             super(itemView);
             mItemImageView = (ImageView)itemView;
+            mItemImageView.setOnClickListener(this);
         }
 
         public void bindDrawable(Drawable drawable){
@@ -258,6 +260,17 @@ public class PhotoGalleryFragment extends VisibleFragment {
                     .load(url)
                     .placeholder(R.drawable.ic_place_holder_small)
                     .into(mItemImageView);
+        }
+
+        public void bindGalleryItem(GalleryItem galleryItem){
+            mGalleryItem = galleryItem;
+            bindPicassoUrl(mGalleryItem.getUrl());
+        }
+
+        @Override
+        public void onClick(View v) {
+            Intent i = PhotoPageActivity.newIntent(getActivity(), mGalleryItem.getPhotoPageUri());
+            startActivity(i);
         }
     }
 
@@ -279,14 +292,7 @@ public class PhotoGalleryFragment extends VisibleFragment {
         @Override
         public void onBindViewHolder(PhotoHolder photoHolder, int position) {
             GalleryItem galleryItem = mGalleryItems.get(position);
-
-            //Use Picasso framework
-            photoHolder.bindPicassoUrl(galleryItem.getUrl());
-
-            //Use own implementation
-            /*Drawable placeholder = getResources().getDrawable(R.drawable.ic_place_holder_small);
-            photoHolder.bindDrawable(placeholder);
-            mThumbnailDownloader.queueThumbnail(photoHolder, galleryItem.getUrl());*/
+            photoHolder.bindGalleryItem(galleryItem);
         }
 
         @Override
